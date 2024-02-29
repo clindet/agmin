@@ -1,41 +1,46 @@
 #' A simple method to set age groups by intervals
 #'
-#' @param x A numeric vector.
+#' @param x Any vector.
+#' @param low_breaks Determine the first age group.
+#' @param high_breaks Determine the last age group.
+#' @param interval Determine the intervals of age groups.
+#' @param to_char Set the connector of age groups (start and end) excluding the first and last.
 #' @examples
-#' age <- 1:100
-#' age_cut(age)
+#' age <- c(1:100, 1:100)
+#' ag_cut(age)
 #' @export
-age_cut <- function(x, low.breaks = 19, high.breaks = 70, interval = 10,
+ag_cut <- function(x, low_breaks = 19, high_breaks = 70, interval = 10,
                     to_char = "-") {
   right <- TRUE
   include.lowest <- FALSE
   x <- str_remove_all(x, "| |years|y|岁|[a-zA-Z]|#|@|!|$|%|^|&|_|=")
   x <- as.numeric(x)
-  breaks <- seq(low.breaks, high.breaks, interval)
+  breaks <- seq(low_breaks, high_breaks, interval)
+  x <- round(x, digits = 0)
   x2 <- cut(round(x), breaks,
       include.lowest = include.lowest, right = right)
-  if (breaks[length(breaks)] != high.breaks) {
-    high.breaks <- breaks[length(breaks)] + 1
+  if (breaks[length(breaks)] != high_breaks) {
+    high_breaks <- breaks[length(breaks)] + 1
   }
   if (!include.lowest) {
     if (right) {
-      x2 <- factor(x2, levels = c(paste0("<", low.breaks + 1), levels(x2), paste0(">=", high.breaks)))
-      x2[is.na(x2) & x <= low.breaks] <- paste0("<", low.breaks + 1)
-      x2[is.na(x2) & x >= high.breaks] <- paste0(">=", high.breaks)
+      x2 <- factor(x2, levels = c(paste0("<", low_breaks + 1), levels(x2), paste0(">=", high_breaks)))
+      x2[is.na(x2) & x <= low_breaks] <- paste0("<", low_breaks + 1)
+      x2[is.na(x2) & x >= high_breaks] <- paste0(">=", high_breaks)
     } else {
-      x2 <- factor(x2, levels = c(paste0("<=", low.breaks - 1), levels(x2), paste0(">=", high.breaks - 1)))
-      x2[is.na(x2) & x <= low.breaks - 1] <- paste0("<=", low.breaks - 1)
-      x2[is.na(x2) & x >= high.breaks - 1] <- paste0(">=", high.breaks - 1)
+      x2 <- factor(x2, levels = c(paste0("<=", low_breaks - 1), levels(x2), paste0(">=", high_breaks - 1)))
+      x2[is.na(x2) & x <= low_breaks - 1] <- paste0("<=", low_breaks - 1)
+      x2[is.na(x2) & x >= high_breaks - 1] <- paste0(">=", high_breaks - 1)
     }
   } else {
     if (right) {
-      x2 <- factor(x2, levels = c(paste0("<", low.breaks), levels(x2), paste0(">", high.breaks)))
-      x2[is.na(x2) & x < low.breaks] <- paste0("<", low.breaks)
-      x2[is.na(x2) & x > high.breaks] <- paste0(">", high.breaks)
+      x2 <- factor(x2, levels = c(paste0("<", low_breaks), levels(x2), paste0(">", high_breaks)))
+      x2[is.na(x2) & x < low_breaks] <- paste0("<", low_breaks)
+      x2[is.na(x2) & x > high_breaks] <- paste0(">", high_breaks)
     } else {
-      x2 <- factor(x2, levels = c(paste0("<", low.breaks - 1), levels(x2), paste0(">", high.breaks - 1)))
-      x2[is.na(x2) & x < low.breaks - 1] <- paste0("<", low.breaks - 1)
-      x2[is.na(x2) & x > high.breaks - 1] <- paste0(">", high.breaks - 1)
+      x2 <- factor(x2, levels = c(paste0("<", low_breaks - 1), levels(x2), paste0(">", high_breaks - 1)))
+      x2[is.na(x2) & x < low_breaks - 1] <- paste0("<", low_breaks - 1)
+      x2[is.na(x2) & x > high_breaks - 1] <- paste0(">", high_breaks - 1)
     }
   }
   c_flag <- str_detect(x2, ",")
@@ -58,6 +63,11 @@ age_cut <- function(x, low.breaks = 19, high.breaks = 70, interval = 10,
       paste0(x[1], to_char, x[2])
     }
   })
+  x3_u <- unique(x3)
+  x3_u <- sort(x3_u)
+  x3_u_inter <- x3_u[!str_detect(x3_u, ">|>=|<|<=")]
+  x3 <- factor(x3, levels = c(x3_u[str_detect(x3_u, "<|<=")], x3_u_inter,
+                              x3_u[str_detect(x3_u, ">|>=")]))
   return(x3)
 }
 
