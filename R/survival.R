@@ -50,3 +50,31 @@ vis_surv <- function(x, group = "age_cut", time = "os", status = "os_status", ti
   return(p)
 }
 
+#' Ezcox for multivariate analysis
+#'
+#' @export
+#' @examples
+#' age <- data.frame(age=rgamma(10000, shape = 50), groups = "Age-50")
+#' age$age_cut <- ag_cut(age$age)
+#' age$os <- c(rgamma(2000, shape = 160), rgamma(2000, shape = 320),
+#'   rgamma(4000, shape = 560), rgamma(2000, shape = 800))
+#' age$os_status <- round(rgamma(10000, shape = 720) %% 2)
+#' age$os_status[age$os_status != 0] <- 1
+#' age$gender <- round(rgamma(10000, shape = 720) %% 2)
+#' age$gender[age$gender != 0] <- 1
+#' vis_cox(age, time = "os", status = "os_status", covariates = "age_cut", controls = c("gender"))
+#' vis_cox(age, ret = c("forest_plot", "model"), time = "os",
+#'        status = "os_status", covariates = "age_cut", controls = c("gender"))
+vis_cox <- function (x, ret = c("forest_plot"), covariates = "age_cut", ...) {
+  m <- ezcox::ezcox(x, covariates = covariates,
+                    return_models = TRUE, ...)
+  mds <- get_models(m)
+  p <- show_models(mds)
+  if (length(ret) != 1) {
+    return(list(mds, p))
+  }
+  if (ret == "forest_plot") {
+    return (p)
+  }
+  return (mds)
+}

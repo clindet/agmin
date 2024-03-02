@@ -10,5 +10,9 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports:
-    stringr
+    survival,
+    stringr,
+    ggplot2,
+    survminer,
+    ezcox
 RoxygenNote: 7.3.1
