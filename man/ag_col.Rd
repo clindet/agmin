@@ -4,7 +4,7 @@
 \alias{ag_col}
 \title{Get age groups colors}
 \usage{
-ag_col(n = 7)
+ag_col(n = 7, theme = "age_cut")
 }
 \arguments{
 \item{n}{Colors size. Maximum N is 7.}

@@ -5,4 +5,7 @@
 #' @importFrom survminer ggsurvplot
 #' @import survival
 #' @import ezcox
+#' @import ggstatsplot
+#' @import patchwork
+#' @import ggsci
 NULL
