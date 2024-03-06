@@ -8,6 +8,7 @@ vis_hist(
   x,
   age_col = "age",
   facet_var = NULL,
+  fill = "#000000",
   binwidth = 1,
   add_param = list(title = "All samples", title_median = TRUE, title_iqr = TRUE, digits =
     0, add_line = "median", linecol = "gray", linetype = "dashed"),

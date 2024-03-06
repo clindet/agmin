@@ -17,7 +17,7 @@
 #' age <- rbind(age, age2)
 #' vis_hist(age, facet_var = "groups")
 #' @export
-vis_hist <- function (x, age_col = "age", facet_var = NULL, binwidth = 1,
+vis_hist <- function (x, age_col = "age", facet_var = NULL, fill = "#000000", binwidth = 1,
                       add_param = list(title = "All samples", title_median = TRUE,
                       title_iqr = TRUE, digits = 0,
                       add_line = "median", linecol = "gray", linetype = "dashed"),
@@ -25,9 +25,10 @@ vis_hist <- function (x, age_col = "age", facet_var = NULL, binwidth = 1,
   opt <- options()
   options(digits = ifelse(add_param$digits == 0, 1, add_param$digits))
   x <- clean_col_df(x, col = age_col, col_rename = "age", facet_var = facet_var)
+  x$fill <- fill
   p <- ggplot(data = x) +
     geom_histogram(aes(x = age),
-                   color="white", binwidth = binwidth) + theme_minimal() +
+                   color="white", binwidth = binwidth, fill = fill) + theme_minimal() +
     theme(panel.grid.minor = element_blank(),
           plot.background = element_rect(fill = "white", color = NA),
           plot.title = element_text(face = "bold"),
@@ -73,7 +74,8 @@ vis_age_title <- function (x, title = "All samples", age_col = "age",
 
 vis_age_title_facet <- function (labs, x, facet_var, ...) {
   for(i in 1:length(labs)) {
-    labs[i] <- vis_age_title(x[x[,facet_var] == labs[i],], title = labs[i], ...)
+    labs[i] <- vis_age_title(x[x[,facet_var] == labs[i],],
+                             title = sprintf("%s-%s", facet_var, labs[i]), ...)
   }
   return(unlist(labs))
 }
@@ -167,7 +169,7 @@ clean_col_df <- function (x, col, col_rename = "age", facet_var = NULL) {
 #' age <- rbind(age, age2)
 #' vis_bar(age, age_cut_col = "age_cut", facet_var = "groups")
 vis_bar <- function (x, age_cut_col = "age_cut", age_col = "age",
-                     facet_var = NULL,
+                     facet_var = NULL, fill = "#000000",
                      add_param = list(title = "All samples", title_median = TRUE,
                      title_iqr = TRUE, digits = 0,
                      add_line = "median", linecol = "gray", linetype = "dashed"), ...) {
@@ -179,14 +181,16 @@ vis_bar <- function (x, age_cut_col = "age_cut", age_col = "age",
 
   if (is.null (facet_var)) {
     x2 <- as.data.frame(table(x$age_cut))
+    x2$fill <- fill
     p <- ggplot(data = x2) +
       geom_bar(aes(x = Var1, y = Freq), stat="identity",
-               color="white") + theme_minimal()
+               color="white", fill = fill) + theme_minimal()
   } else {
     x2 <- as.data.frame(table(x[,facet_var], x$age_cut))
+    x2$fill <- fill
     p <- ggplot(data = x2) +
       geom_bar(aes(x = Var2, y = Freq), stat="identity",
-               color="white") + theme_minimal()
+               color="white", fill = fill) + theme_minimal()
   }
   p <- p + theme(panel.grid.minor = element_blank(),
           plot.background = element_rect(fill = "white", color = NA),

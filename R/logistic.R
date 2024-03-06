@@ -11,7 +11,7 @@
 #' age$facet_var[age$facet_var != 0] <- 1
 #' vis_bar_logic(age, "os_status")
 #' @export
-vis_bar_logic <- function (x, factor_var, age_cut = "age_cut", facet_var = NULL, xlab = "Age groups",
+vis_bar_logic <- function (x, factor_var, age_cut = "age_cut", facet_var = NULL, title_prefix = "", xlab = "Age groups",
                            ylab = "Percent", digits = 3, palt = ag_col(theme = "pal_npg"), ...) {
 
   if (is.null (facet_var)) {
@@ -26,8 +26,8 @@ vis_bar_logic <- function (x, factor_var, age_cut = "age_cut", facet_var = NULL,
       do.call(ggbarstats, list(data= x,
         x = factor_var,
         y = age_cut,
-        title = sprintf("%s ~ %s: Z-value:%s; P-value: %s",
-                           age_cut, factor_var, z_val, p_val),
+        title = sprintf("%s%s ~ %s: Z-value:%s; P-value: %s",
+                           title_prefix, age_cut, factor_var, z_val, p_val),
         results.subtitle = FALSE,
         ggplot.component = list(
         ggplot2::scale_x_discrete(guide = ggplot2::guide_axis(n.dodge = 2)))
@@ -44,7 +44,9 @@ vis_bar_logic <- function (x, factor_var, age_cut = "age_cut", facet_var = NULL,
   if (is.factor(x[,facet_var])) {
     p <- NULL
     for (i in levels(x[,facet_var])) {
-      ptmp <- vis_bar_logic(x[x[,facet_var] == i,], factor_var, age_cut = age_cut, xlab = xlab,
+      ptmp <- vis_bar_logic(x[x[,facet_var] == i,], factor_var, age_cut = age_cut,
+                            title_prefix = paste0(facet_var, "-", i, ": "),
+                            xlab = xlab,
                             ylab = ylab, digits = digits, ...)
       if (is.null(p)) {
         p <- ptmp
@@ -55,7 +57,9 @@ vis_bar_logic <- function (x, factor_var, age_cut = "age_cut", facet_var = NULL,
   } else {
     p <- NULL
     for (i in unique(x[,facet_var])) {
-      ptmp <- vis_bar_logic(x[x[,facet_var] == i,], factor_var, age_cut = age_cut, xlab = xlab,
+      ptmp <- vis_bar_logic(x[x[,facet_var] == i,], factor_var, age_cut = age_cut,
+                            title_prefix = paste0(facet_var, "-", i, ": "),
+                            xlab = xlab,
                             ylab = ylab, digits = digits, ...)
       if (is.null(p)) {
         p <- ptmp

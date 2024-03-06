@@ -9,10 +9,11 @@ vis_bar_logic(
   factor_var,
   age_cut = "age_cut",
   facet_var = NULL,
+  title_prefix = "",
   xlab = "Age groups",
   ylab = "Percent",
   digits = 3,
-  palt = ag_col(n = 8, theme = "age_cut"),
+  palt = ag_col(theme = "pal_npg"),
   ...
 )
 }

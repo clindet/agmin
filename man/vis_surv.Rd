@@ -13,7 +13,7 @@ vis_surv(
   xlab = "Time in days",
   leg_labs = NULL,
   xlim = NULL,
-  plt = NULL,
+  palt = NULL,
   brk = 180,
   rtb = TRUE,
   pval = TRUE,
@@ -37,5 +37,5 @@ age$os <- c(rgamma(2000, shape = 160), rgamma(2000, shape = 320),
   rgamma(4000, shape = 560), rgamma(2000, shape = 800))
 age$os_status <- round(rgamma(10000, shape = 720) \%\% 2)
 age$os_status[age$os_status != 0] <- 1
-vis_surv(age, plt = ag_col()[-c(1,2)])
+vis_surv(age, palt = ag_col()[-c(1,2)])
 }

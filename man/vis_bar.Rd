@@ -9,6 +9,7 @@ vis_bar(
   age_cut_col = "age_cut",
   age_col = "age",
   facet_var = NULL,
+  fill = "#000000",
   add_param = list(title = "All samples", title_median = TRUE, title_iqr = TRUE, digits =
     0, add_line = "median", linecol = "gray", linetype = "dashed"),
   ...

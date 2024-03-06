@@ -8,4 +8,5 @@
 #' @import ggstatsplot
 #' @import patchwork
 #' @import ggsci
+#' @import ggplotify
 NULL

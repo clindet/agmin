@@ -8,10 +8,10 @@
 #'   rgamma(4000, shape = 560), rgamma(2000, shape = 800))
 #' age$os_status <- round(rgamma(10000, shape = 720) %% 2)
 #' age$os_status[age$os_status != 0] <- 1
-#' vis_surv(age, plt = ag_col()[-c(1,2)])
+#' vis_surv(age, palt = ag_col()[-c(1,2)])
 vis_surv <- function(x, group = "age_cut", time = "os", status = "os_status", title = "",
                      xlab = "Time in days",
-                     leg_labs = NULL, xlim = NULL, plt = NULL, brk = 180,
+                     leg_labs = NULL, xlim = NULL, palt = NULL, brk = 180,
                      rtb = TRUE, pval = TRUE, conf_int = TRUE, conf_alpha = 0.1,
                      nc_plot = FALSE, nc_plot_h = 0.3, rtb_y_col = TRUE, rtb_y = FALSE, rtb_h = 0.25,
                      ...) {
@@ -25,13 +25,13 @@ vis_surv <- function(x, group = "age_cut", time = "os", status = "os_status", ti
     leg_labs <- levels(x$age_cut)
   }
   fit <- survfit(Surv(os, os_status) ~ age_cut, data = x)
-  p <- ggsurvplot(
+  params <- list(
     fit,
     data = x,
     risk.table = rtb,
     pval = pval,
     conf.int = conf_int,
-    palette = plt,
+    palette = palt,
     xlim = xlim,
     # survival estimates.
     xlab = xlab,
@@ -47,6 +47,7 @@ vis_surv <- function(x, group = "age_cut", time = "os", status = "os_status", ti
     legend.labs = leg_labs,
     ...
   )
+  p <- do.call(ggsurvplot, params)
   return(p)
 }
 
