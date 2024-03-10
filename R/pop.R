@@ -172,6 +172,8 @@ vis_bar <- function (x, age_cut_col = "age_cut", age_col = "age",
                      facet_var = NULL, fill = NULL,
                      convert_to_percent = FALSE,
                      show_zero = FALSE,
+                     palt = NULL,
+                     bar_val = NULL,
                      add_param = list(title = "All samples", title_median = TRUE,
                      title_iqr = TRUE, digits = 0,
                      add_line = "median", linecol = "gray", linetype = "dashed"), ...) {
@@ -181,23 +183,27 @@ vis_bar <- function (x, age_cut_col = "age_cut", age_col = "age",
                     col_rename = c("age_cut", "age"),
                     facet_var = facet_var)
 
+  if (is.null(palt)) palt <- ag_col()
+
   if (is.null(fill) || !fill %in% colnames(x)) {
-    x$fill <- "all"
-    fill <- "fill"
+    x$Groups <- "all"
+    fill <- "Groups"
   }
   if (is.null (facet_var)) {
     x2 <- as.data.frame(table(x$age_cut, x[,fill]))
     x2$Percent <- 0
     if (convert_to_percent) {
       x2 <- x2 %>% group_by(Var1) %>%
-        mutate(Percent = Freq/sum(Freq)*100)
+        mutate(Percent = Freq/sum(Freq)*ifelse("all" %in% bar_val, 200, 100))
       print(x2)
       if (!show_zero) x2 <- x2[x2$Var2 != "0",]
+      if (!is.null(bar_val)) x2 <- x2[x2$Var2 %in% bar_val,]
       p <- ggplot(data = x2) +
         geom_bar(aes(x = Var1, y = Percent, fill = Var2), stat="identity", position = "dodge",
                  color="white") + theme_minimal()
     } else {
       if (!show_zero) x2 <- x2[x2$Var2 != "0",]
+      if (!is.null(bar_val)) x2 <- x2[x2$Var2 %in% bar_val,]
       p <- ggplot(data = x2) +
         geom_bar(aes(x = Var1, y = Freq, fill = Var2), stat="identity", position = "dodge",
                  color="white") + theme_minimal()
@@ -207,13 +213,16 @@ vis_bar <- function (x, age_cut_col = "age_cut", age_col = "age",
     x2$Percent <- 0
     if (convert_to_percent) {
       x2 <- x2 %>% group_by(Var1, Var2) %>%
-        mutate(Percent = Freq/sum(Freq)*100)
+        mutate(Percent = Freq/sum(Freq)*ifelse("all" %in% bar_val, 200, 100))
       if (!show_zero) x2 <- x2[x2$Var2 != "0",]
+      if (!is.null(bar_val)) x2 <- x2[x2$Var3 %in% bar_val,]
       p <- ggplot(data = x2) +
         geom_bar(aes(x = Var2, y = Percent, fill = Var3), stat="identity", position = "dodge",
-                 color="white") + theme_minimal()
+                 color="white") + theme_minimal() +
+        scale_fill_manual(values = palt)
     } else {
       if (!show_zero) x2 <- x2[x2$Var2 != "0",]
+      if (!is.null(bar_val)) x2 <- x2[x2$Var3 %in% bar_val,]
       p <- ggplot(data = x2) +
         geom_bar(aes(x = Var2, y = Freq, fill = Var3), stat="identity", position = "dodge",
                  color="white") + theme_minimal()
@@ -225,7 +234,8 @@ vis_bar <- function (x, age_cut_col = "age_cut", age_col = "age",
           axis.title = element_text(face = "bold"),
           strip.text = element_text(face = "bold", size = rel(0.8), hjust = 0),
           strip.background = element_rect(fill = "grey80", color = NA),
-          legend.title = element_text(face = "bold"))
+          legend.title = element_text(face = "bold")) +
+    scale_fill_manual(values = palt) + guides(fill = guide_legend(reverse=TRUE, title = fill))
   add_param$x <- x
   add_param$p <- p
   add_param$facet_var <- facet_var
@@ -291,7 +301,8 @@ vis_bar_logic <- function (x, factor_var, age_cut = "age_cut", facet_var = NULL,
       ptmp <- vis_bar_logic(x[x[,facet_var] == i,], factor_var, age_cut = age_cut,
                             title_prefix = paste0(facet_var, "-", i, ": "),
                             xlab = xlab,
-                            ylab = ylab, digits = digits, ...)
+                            ylab = ylab, digits = digits, ...) +
+        scale_fill_manual(values = palt)
       if (is.null(p)) {
         p <- ptmp
       } else {
@@ -304,7 +315,8 @@ vis_bar_logic <- function (x, factor_var, age_cut = "age_cut", facet_var = NULL,
       ptmp <- vis_bar_logic(x[x[,facet_var] == i,], factor_var, age_cut = age_cut,
                             title_prefix = paste0(facet_var, "-", i, ": "),
                             xlab = xlab,
-                            ylab = ylab, digits = digits, ...)
+                            ylab = ylab, digits = digits, ...) +
+        scale_fill_manual(values = palt)
       if (is.null(p)) {
         p <- ptmp
       } else {

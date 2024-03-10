@@ -155,7 +155,7 @@ vis_mutc_percent <- function(x, maf, age = "age", facet_var = "fusion_genes", fi
     p <- NULL
     for (i in levels(x[,facet_var])) {
       xtmp <- x[x[,facet_var] == i,]
-      res <- logist_val(xtmp)
+      res <- logist_val(xtmp, logist_mutc)
       z_val <- res[[1]]
       p_val <- res[[2]]
       ptmp <- do.call(ggbarstats, list(data = xtmp, x = "mut.count.Freq.class", y = fill,
@@ -284,7 +284,7 @@ clean_x_maf <- function (x, maf, age = "age", fill = "fusion_genes",
   return(list(x, maf, pcent_res))
 }
 
-logist_val <- function (x) {
+logist_val <- function (x, logist_mutc = 4) {
   x2 <- x
   x2[,"age_cut"] <- as.numeric(x2[,"age_cut"])
   x2$logist_mutc <- 0
