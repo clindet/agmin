@@ -9,4 +9,5 @@
 #' @import patchwork
 #' @import ggsci
 #' @import ggplotify
+#' @import ggpubr
 NULL
