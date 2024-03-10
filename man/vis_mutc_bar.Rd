@@ -7,7 +7,6 @@
 vis_mutc_bar(
   maf,
   palt = NULL,
-  cutoff = 3,
   sample_id = "Tumor_Sample_Barcode",
   gene = "Hugo_Symbol",
   type = "Variant_Classification"

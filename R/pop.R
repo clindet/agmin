@@ -169,7 +169,9 @@ clean_col_df <- function (x, col, col_rename = "age", facet_var = NULL) {
 #' age <- rbind(age, age2)
 #' vis_bar(age, age_cut_col = "age_cut", facet_var = "groups")
 vis_bar <- function (x, age_cut_col = "age_cut", age_col = "age",
-                     facet_var = NULL, fill = "#000000",
+                     facet_var = NULL, fill = NULL,
+                     convert_to_percent = FALSE,
+                     show_zero = FALSE,
                      add_param = list(title = "All samples", title_median = TRUE,
                      title_iqr = TRUE, digits = 0,
                      add_line = "median", linecol = "gray", linetype = "dashed"), ...) {
@@ -179,18 +181,43 @@ vis_bar <- function (x, age_cut_col = "age_cut", age_col = "age",
                     col_rename = c("age_cut", "age"),
                     facet_var = facet_var)
 
+  if (is.null(fill) || !fill %in% colnames(x)) {
+    x$fill <- "all"
+    fill <- "fill"
+  }
   if (is.null (facet_var)) {
-    x2 <- as.data.frame(table(x$age_cut))
-    x2$fill <- fill
-    p <- ggplot(data = x2) +
-      geom_bar(aes(x = Var1, y = Freq), stat="identity",
-               color="white", fill = fill) + theme_minimal()
+    x2 <- as.data.frame(table(x$age_cut, x[,fill]))
+    x2$Percent <- 0
+    if (convert_to_percent) {
+      x2 <- x2 %>% group_by(Var1) %>%
+        mutate(Percent = Freq/sum(Freq)*100)
+      print(x2)
+      if (!show_zero) x2 <- x2[x2$Var2 != "0",]
+      p <- ggplot(data = x2) +
+        geom_bar(aes(x = Var1, y = Percent, fill = Var2), stat="identity", position = "dodge",
+                 color="white") + theme_minimal()
+    } else {
+      if (!show_zero) x2 <- x2[x2$Var2 != "0",]
+      p <- ggplot(data = x2) +
+        geom_bar(aes(x = Var1, y = Freq, fill = Var2), stat="identity", position = "dodge",
+                 color="white") + theme_minimal()
+    }
   } else {
-    x2 <- as.data.frame(table(x[,facet_var], x$age_cut))
-    x2$fill <- fill
-    p <- ggplot(data = x2) +
-      geom_bar(aes(x = Var2, y = Freq), stat="identity",
-               color="white", fill = fill) + theme_minimal()
+    x2 <- as.data.frame(table(x[,facet_var], x$age_cut, x[,fill]))
+    x2$Percent <- 0
+    if (convert_to_percent) {
+      x2 <- x2 %>% group_by(Var1, Var2) %>%
+        mutate(Percent = Freq/sum(Freq)*100)
+      if (!show_zero) x2 <- x2[x2$Var2 != "0",]
+      p <- ggplot(data = x2) +
+        geom_bar(aes(x = Var2, y = Percent, fill = Var3), stat="identity", position = "dodge",
+                 color="white") + theme_minimal()
+    } else {
+      if (!show_zero) x2 <- x2[x2$Var2 != "0",]
+      p <- ggplot(data = x2) +
+        geom_bar(aes(x = Var2, y = Freq, fill = Var3), stat="identity", position = "dodge",
+                 color="white") + theme_minimal()
+    }
   }
   p <- p + theme(panel.grid.minor = element_blank(),
           plot.background = element_rect(fill = "white", color = NA),
@@ -205,7 +232,8 @@ vis_bar <- function (x, age_cut_col = "age_cut", age_col = "age",
   add_param$facet_mode <- "bar"
   add_param$age_col <- age_col
   p <- do.call(add_title_vline, add_param)
-  p <- set_font(p, ...) + xlab ("Age groups") + ylab("Count")
+  p <- set_font(p, ...) + xlab ("Age groups") +
+    ylab(ifelse(convert_to_percent, "Percentage (%)", "Counts"))
   options(opt)
   return(p)
 }
@@ -224,13 +252,17 @@ vis_bar <- function (x, age_cut_col = "age_cut", age_col = "age",
 #' vis_bar_logic(age, "os_status")
 #' @export
 vis_bar_logic <- function (x, factor_var, age_cut = "age_cut", facet_var = NULL, title_prefix = "", xlab = "Age groups",
-                           ylab = "Percent", digits = 3, palt = ag_col(theme = "pal_npg"), ...) {
+                           ylab = "Percent", digits = 3, palt = ag_col(theme = "pal_npg"),
+                           negative_flag = c("0", ".", "Negative", "negative", "control"), ...) {
 
   if (is.null (facet_var)) {
     x2 <- x
     x2[,age_cut] <- as.numeric(x2[,age_cut])
+    x2[,paste0(factor_var, "_binary")] <- 0
+    x2[x2[,factor_var] %in% negative_flag, paste0(factor_var, "_binary")] <- 1
+
     logistic <- eval(parse(text = sprintf("glm(%s ~ %s,
-                      data = x2, family = binomial())", factor_var, age_cut)))
+                      data = x2, family = binomial())", paste0(factor_var, "_binary"), age_cut)))
     res <- summary(logistic)
     z_val <- round(res$coefficients[2,3], digits = digits)
     p_val <- round(res$coefficients[2,4], digits = digits)

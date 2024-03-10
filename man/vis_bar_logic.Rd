@@ -14,6 +14,7 @@ vis_bar_logic(
   ylab = "Percent",
   digits = 3,
   palt = ag_col(theme = "pal_npg"),
+  negative_flag = c("0", ".", "Negative", "negative", "control"),
   ...
 )
 }

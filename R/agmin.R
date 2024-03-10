@@ -10,4 +10,5 @@
 #' @import ggsci
 #' @import ggplotify
 #' @import ggpubr
+#' @import dplyr
 NULL

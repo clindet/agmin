@@ -10,6 +10,7 @@ vis_mutc_percent(
   age = "age",
   facet_var = "fusion_genes",
   fill = "fusion_genes",
+  palt = NULL,
   sample_id = "Tumor_Sample_Barcode",
   gene = "Hugo_Symbol",
   type = "Variant_Classification",
