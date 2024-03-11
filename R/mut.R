@@ -91,8 +91,8 @@ vis_mutc_scatter <- function(x, maf, age = "age", facet_var = "fusion_genes", fi
 
   x_list <- clean_x_maf(x, maf, age, fill, sample_id, gene, type)
   x <- x_list[[1]]
-  p <- do.call(ggscatter, list(x, x = age, y='mut.count.Freq',
-                          color = fill, size = 1))
+  p <- ggscatter(data = x, x = 'age', y='mut.count.Freq',
+                          color = fill, size = 1)
   p <- p + xlab(age) + ylab("Number of mutations") +
     geom_smooth(method = 'lm', formula = y~x, se = TRUE, show.legend = FALSE) +
     stat_cor(data = x, aes(label = paste(..r.label.., ..p.label.., sep = '~`,`~')),
@@ -143,22 +143,28 @@ vis_mutc_boxplot <- function(x, maf, age = "age", facet_var = "fusion_genes", fi
 
 #' Percent barplot
 #'
+#' @examples
+#' maf <- read.csv(system.file("extdata", "aml_maf.txt", package = "agmin"), sep = "\t")
+#' x <- read.csv(system.file("extdata", "aml_samples.txt", package = "agmin"), sep = "\t")
+#' row.names(x) <- x[,1]
+#' x$age_cut <- ag_cut(x$Age)
+#' vis_mutc_percent(x, maf, age = "Age", facet_var = "", fill = "", palt = ag_col())
 #' @export
-vis_mutc_percent <- function(x, maf, age = "age", facet_var = "fusion_genes", fill = "fusion_genes",
+vis_mutc_percent <- function(x, maf, age = "age", facet_var = "fusion_genes", y_axis = "age_cut",
                   palt = NULL,
                   sample_id = "Tumor_Sample_Barcode", gene = "Hugo_Symbol",
                   type = "Variant_Classification", logist_mutc = 4) {
-  x_list <- clean_x_maf(x, maf, age, fill, sample_id, gene, type)
+  x_list <- clean_x_maf(x, maf, age, y_axis, sample_id, gene, type)
   x <- x_list[[1]]
 
   if (facet_var != "" && facet_var %in% colnames(x)) {
     p <- NULL
     for (i in levels(x[,facet_var])) {
       xtmp <- x[x[,facet_var] == i,]
-      res <- logist_val(xtmp, logist_mutc)
+      res <- logist_val(xtmp, logist_mutc = logist_mutc, age_cut = "age_cut")
       z_val <- res[[1]]
       p_val <- res[[2]]
-      ptmp <- do.call(ggbarstats, list(data = xtmp, x = "mut.count.Freq.class", y = fill,
+      ptmp <- do.call(ggbarstats, list(data = xtmp, x = "mut.count.Freq.class", y = y_axis,
                                       results.subtitle = FALSE,
                                       title = sprintf("%s-%s: Z-value: %s; P-value: %s",
                                                       facet_var, i, z_val, p_val),
@@ -175,10 +181,10 @@ vis_mutc_percent <- function(x, maf, age = "age", facet_var = "fusion_genes", fi
       }
     }
   } else {
-    res <- logist_val(x)
+    res <- logist_val(x, logist_mutc = logist_mutc, age_cut = "age_cut")
     z_val <- res[[1]]
     p_val <- res[[2]]
-    p <- do.call(ggbarstats, list(data = x, x = "mut.count.Freq.class", y = fill,
+    p <- do.call(ggbarstats, list(data = x, x = "mut.count.Freq.class", y = y_axis,
                                   results.subtitle = FALSE,
                                   title = sprintf("Z-value:%s; P-value: %s",
                                                   z_val, p_val),
@@ -228,12 +234,12 @@ clean_x_maf <- function (x, maf, age = "age", fill = "fusion_genes",
     fill <- "fill"
   }
 
-  x$age <- as.numeric(x$age)
-  colnames(x)[which(colnames(maf) == age)] <- "age"
-  colnames(x)[which(colnames(maf) == fill)] <- "fill"
+  colnames(x)[which(colnames(x) == age)] <- "age"
   colnames(maf)[which(colnames(maf) == sample_id)] <- "sample_id"
   colnames(maf)[which(colnames(maf) == gene)] <- "gene"
   colnames(maf)[which(colnames(maf) == type)] <- "type"
+
+  if ("age" %in% colnames(x)) x$age <- as.numeric(x$age)
 
   if (!is.factor(x[,fill]) && length(x[,fill]) != 1) {
     x[!is.na(x[,fill]) & x[,fill] != "." & x[,fill] != 0, fill] <- "yes"
@@ -284,13 +290,13 @@ clean_x_maf <- function (x, maf, age = "age", fill = "fusion_genes",
   return(list(x, maf, pcent_res))
 }
 
-logist_val <- function (x, logist_mutc = 4) {
+logist_val <- function (x, age_cut = "age_cut", logist_mutc = 4) {
   x2 <- x
-  x2[,"age_cut"] <- as.numeric(x2[,"age_cut"])
+  x2[,age_cut] <- as.numeric(x2[,age_cut])
   x2$logist_mutc <- 0
   x2$logist_mutc[x2$mut.count.Freq >= logist_mutc] <- 1
   logistic <- eval(parse(text = sprintf("glm(logist_mutc ~ %s,
-                      data = x2, family = binomial())", fill)))
+                      data = x2, family = binomial())", age_cut)))
   res <- summary(logistic)
   z_val <- round(res$coefficients[2,3], digits = 3)
   p_val <- round(res$coefficients[2,4], digits = 3)
