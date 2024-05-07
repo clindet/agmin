@@ -12,6 +12,8 @@ vis_bar(
   fill = NULL,
   convert_to_percent = FALSE,
   show_zero = FALSE,
+  palt = NULL,
+  bar_val = NULL,
   add_param = list(title = "All samples", title_median = TRUE, title_iqr = TRUE, digits =
     0, add_line = "median", linecol = "gray", linetype = "dashed"),
   ...

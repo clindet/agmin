@@ -9,7 +9,7 @@ vis_mutc_percent(
   maf,
   age = "age",
   facet_var = "fusion_genes",
-  fill = "fusion_genes",
+  y_axis = "age_cut",
   palt = NULL,
   sample_id = "Tumor_Sample_Barcode",
   gene = "Hugo_Symbol",
@@ -19,4 +19,11 @@ vis_mutc_percent(
 }
 \description{
 Percent barplot
+}
+\examples{
+maf <- read.csv(system.file("extdata", "aml_maf.txt", package = "agmin"), sep = "\t")
+x <- read.csv(system.file("extdata", "aml_samples.txt", package = "agmin"), sep = "\t")
+row.names(x) <- x[,1]
+x$age_cut <- ag_cut(x$Age)
+vis_mutc_percent(x, maf, age = "Age", facet_var = "", fill = "", palt = ag_col())
 }

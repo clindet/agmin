@@ -14,5 +14,9 @@ Imports:
     stringr,
     ggplot2,
     survminer,
-    ezcox
+    ezcox,
+    clusterProfiler,
+    escape
 RoxygenNote: 7.3.1
+Depends: 
+    R (>= 2.10)
