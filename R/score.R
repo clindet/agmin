@@ -30,8 +30,8 @@ gsea_senmayo <- function(geneList,type = 'Geneid',...){
 #' @examples
 #' tpm_sample <- data(tpm_sample)
 #' gsva_senmayo(t(tpm_sample),groups = 10, cores = 2)
-#' @importFrom escape enrichIt
+#' @importFrom escape escape.matrix
 gsva_senmayo <- function(obj,...){
-  res <- enrichIt(obj = obj, gene.sets = SenMayoSet,...)
+  res <- escape.matrix(obj = obj, gene.sets = SenMayoSet,...)
   return(res)
 }

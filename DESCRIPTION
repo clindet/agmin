@@ -1,7 +1,7 @@
 Package: agmin
 Type: Package
 Title: Age-related Data Mining Suite
-Version: 0.1.0
+Version: 0.2.0
 Author: Jianfeng Li
 Maintainer: Jianfeng Li <lee_jianfeng@sjtu.edu.cn>
 Description: We implemented a comprehensive R package for mining age-related clinical and omics features.
@@ -16,7 +16,7 @@ Imports:
     survminer,
     ezcox,
     clusterProfiler,
-    escape
-RoxygenNote: 7.3.1
+    escape (>= 2.2.1)
+RoxygenNote: 7.3.2
 Depends: 
     R (>= 2.10)
